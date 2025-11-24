@@ -1,12 +1,18 @@
 /* Standard HTML Heading Defaults */
 /* ------------------------------ */
 
+:root {
+  --dark-blue: #065369;
+  --light-blue: #2F7082;
+}
+
+
 /* H1 */
 .vfrc-system-response .vfrc-message h1 {
   font-size: 26px;
   font-weight: 700;
   margin: 16px 0 8px;
-  color: #1A1A1A;
+  color: var(--dark-blue);
 }
 
 /* H2 */
@@ -14,7 +20,7 @@
   font-size: 22px;
   font-weight: 700;
   margin: 14px 0 6px;
-  color: #333333;
+  color: var(--light-blue);
 }
 
 /* H3 */

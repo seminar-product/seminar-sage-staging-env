@@ -1,6 +1,6 @@
 /* Standard HTML Heading Defaults */
 /* ------------------------------ */
-html {
+#voiceflow-container {
   --dark-blue: #065369;
   --light-blue: #2F7082;
 }

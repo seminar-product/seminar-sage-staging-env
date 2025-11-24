@@ -1,7 +1,6 @@
 /* Standard HTML Heading Defaults */
 /* ------------------------------ */
-
-:root {
+html {
   --dark-blue: #065369;
   --light-blue: #2F7082;
 }

@@ -11,7 +11,7 @@
   font-size: 26px;
   font-weight: 700;
   margin: 16px 0 8px;
-  color: var(--dark-blue);
+  color: var(--dark-blue)!important;
 }
 
 /* H2 */
@@ -19,7 +19,7 @@
   font-size: 22px;
   font-weight: 700;
   margin: 14px 0 6px;
-  color: var(--light-blue);
+  color: var(--light-blue)!important;
 }
 
 /* H3 */

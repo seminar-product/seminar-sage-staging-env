@@ -3,6 +3,7 @@
 .vfrc-system-response {
   --dark-blue: #065369;
   --light-blue: #2F7082;
+  --very-light-blue: #51A9C1;
 }
 
 
@@ -27,7 +28,7 @@
   font-size: 18px;
   font-weight: 600;
   margin: 12px 0 4px;
-  color: #444444;
+  color: var(--very-light-blue);
 }
 
 /* H4 */

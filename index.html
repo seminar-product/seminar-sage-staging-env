@@ -90,7 +90,7 @@
                       resolve({
                         fileName: file.name,
                         fileType: file.type,
-                        fileData: atob(base64)
+                        fileData: fileData // ✔ use the conditional value
                       });
                     } catch (err) {
                       reject(err);

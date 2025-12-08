@@ -78,6 +78,15 @@
                   reader.onload = () => {
                     try {
                       const base64 = reader.result.split(',')[1];
+                         // Decide how to store fileData
+                      let fileData;
+                      if (file.type.startsWith("text/")) {
+                        // CSV, TXT, etc → safe to decode
+                        fileData = atob(base64);
+                      } else {
+                          // DOCX, PDF, ZIP, etc → MUST KEEP base64
+                          fileData = base64;
+                      }
                       resolve({
                         fileName: file.name,
                         fileType: file.type,

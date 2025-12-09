@@ -45,24 +45,24 @@
           }
           v.src = "https://cdn.voiceflow.com/widget-next/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
 
-        // 📦 Define the FileUploadExtension
+    // 📦 Define the FileUploadExtension
         const FileUploadExtension = {
           name: 'FileUpload',
           type: 'response',
           match: ({ trace }) =>
             trace.type === 'ext_csvFileUpload' ||
             trace.payload?.name === 'ext_csvFileUpload',
-        
+    
           render: ({ trace, element }) => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = trace.payload.accepted || '*/*';
             input.multiple = true;
-        
+    
             input.onchange = () => {
               const files = Array.from(input.files || []);
               const MAX_SIZE = 3 * 1024 * 1024; // 3 MB
-        
+    
               const validFiles = files.filter(file => {
                 if (file.size > MAX_SIZE) {
                   alert(`File "${file.name}" is too large. Max size is 3MB.`);
@@ -70,63 +70,38 @@
                 }
                 return true;
               });
-        
+    
               if (validFiles.length === 0) return;
-        
+    
               const fileReadPromises = validFiles.map(file => {
                 return new Promise((resolve, reject) => {
                   const reader = new FileReader();
-        
                   reader.onload = () => {
                     try {
                       const base64 = reader.result.split(',')[1];
-        
-                      // ----------------------------------------------------
-                      // UPDATED SECTION (DOCX + binary-safe file handling)
-                      // ----------------------------------------------------
-        
+                         // Decide how to store fileData
                       let fileData;
-        
-                      const binaryTypes = [
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-                        "application/pdf",
-                        "application/zip",
-                        "application/vnd.ms-excel",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        "image/png",
-                        "image/jpeg",
-                        "image/gif",
-                      ];
-        
-                      if (file.type.startsWith("text/") || file.name.endsWith(".csv") || file.name.endsWith(".txt")) {
-                        // CSV, TXT → decode safely
+                      if (file.type.startsWith("text/")) {
+                        // CSV, TXT, etc → safe to decode
                         fileData = atob(base64);
-                      } else if (binaryTypes.includes(file.type)) {
-                        // DOCX, PDF, ZIP, images → keep raw base64
-                        fileData = base64;
                       } else {
-                        // fallback → keep raw base64
-                        fileData = base64;
+                          // DOCX, PDF, ZIP, etc → MUST KEEP base64
+                          fileData = base64;
                       }
-        
-                      // ----------------------------------------------------
-        
                       resolve({
                         fileName: file.name,
                         fileType: file.type,
-                        fileData: fileData
+                        fileData: fileData // ✔ use the conditional value
                       });
-        
                     } catch (err) {
                       reject(err);
                     }
                   };
-        
                   reader.onerror = reject;
                   reader.readAsDataURL(file);
                 });
               });
-        
+    
               Promise.all(fileReadPromises)
                 .then(filePayloads => {
                   window.voiceflow.chat.interact({
@@ -139,86 +114,11 @@
                   console.error(err);
                 });
             };
-        
+    
             element.appendChild(input);
           }
         };
+      })(document, 'script');
 </script>
-
-//     // 📦 Define the FileUploadExtension
-//         const FileUploadExtension = {
-//           name: 'FileUpload',
-//           type: 'response',
-//           match: ({ trace }) =>
-//             trace.type === 'ext_csvFileUpload' ||
-//             trace.payload?.name === 'ext_csvFileUpload',
-    
-//           render: ({ trace, element }) => {
-//             const input = document.createElement('input');
-//             input.type = 'file';
-//             input.accept = trace.payload.accepted || '*/*';
-//             input.multiple = true;
-    
-//             input.onchange = () => {
-//               const files = Array.from(input.files || []);
-//               const MAX_SIZE = 3 * 1024 * 1024; // 3 MB
-    
-//               const validFiles = files.filter(file => {
-//                 if (file.size > MAX_SIZE) {
-//                   alert(`File "${file.name}" is too large. Max size is 3MB.`);
-//                   return false;
-//                 }
-//                 return true;
-//               });
-    
-//               if (validFiles.length === 0) return;
-    
-//               const fileReadPromises = validFiles.map(file => {
-//                 return new Promise((resolve, reject) => {
-//                   const reader = new FileReader();
-//                   reader.onload = () => {
-//                     try {
-//                       const base64 = reader.result.split(',')[1];
-//                          // Decide how to store fileData
-//                       let fileData;
-//                       if (file.type.startsWith("text/")) {
-//                         // CSV, TXT, etc → safe to decode
-//                         fileData = atob(base64);
-//                       } else {
-//                           // DOCX, PDF, ZIP, etc → MUST KEEP base64
-//                           fileData = base64;
-//                       }
-//                       resolve({
-//                         fileName: file.name,
-//                         fileType: file.type,
-//                         fileData: fileData // ✔ use the conditional value
-//                       });
-//                     } catch (err) {
-//                       reject(err);
-//                     }
-//                   };
-//                   reader.onerror = reject;
-//                   reader.readAsDataURL(file);
-//                 });
-//               });
-    
-//               Promise.all(fileReadPromises)
-//                 .then(filePayloads => {
-//                   window.voiceflow.chat.interact({
-//                     type: 'complete',
-//                     payload: { files: filePayloads }
-//                   });
-//                 })
-//                 .catch(err => {
-//                   alert("Error reading one or more files.");
-//                   console.error(err);
-//                 });
-//             };
-    
-//             element.appendChild(input);
-//           }
-//         };
-//       })(document, 'script');
-// </script>
 </body>
 </html>

@@ -19,6 +19,11 @@
             font-family: 'Mulish', sans-serif !important;
         }
     </style>
+    <!-- DOCX converter -->
+    <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+     <!-- EXCEL converter -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 </head>
 <body>
     <div id="voiceflow-container"></div>
@@ -52,17 +57,17 @@
           match: ({ trace }) =>
             trace.type === 'ext_csvFileUpload' ||
             trace.payload?.name === 'ext_csvFileUpload',
-    
+        
           render: ({ trace, element }) => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = trace.payload.accepted || '*/*';
             input.multiple = true;
-    
+        
             input.onchange = () => {
               const files = Array.from(input.files || []);
               const MAX_SIZE = 3 * 1024 * 1024; // 3 MB
-    
+        
               const validFiles = files.filter(file => {
                 if (file.size > MAX_SIZE) {
                   alert(`File "${file.name}" is too large. Max size is 3MB.`);
@@ -70,38 +75,124 @@
                 }
                 return true;
               });
-    
+        
               if (validFiles.length === 0) return;
-    
+        
               const fileReadPromises = validFiles.map(file => {
                 return new Promise((resolve, reject) => {
                   const reader = new FileReader();
+        
                   reader.onload = () => {
                     try {
                       const base64 = reader.result.split(',')[1];
-                         // Decide how to store fileData
                       let fileData;
+        
+                      // ----------------------------------------------------
+                      // DOCX → TEXT 
+                      // ----------------------------------------------------
+                      const isDocx =
+                        file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+                        file.name.toLowerCase().endsWith(".docx");
+        
                       if (file.type.startsWith("text/")) {
-                        // CSV, TXT, etc → safe to decode
+                        // CSV, TXT → decode safely
                         fileData = atob(base64);
-                      } else {
-                          // DOCX, PDF, ZIP, etc → MUST KEEP base64
-                          fileData = base64;
+        
+                        resolve({
+                          fileName: file.name,
+                          fileType: file.type,
+                          fileData
+                        });
+                        return;
                       }
+        
+                      if (isDocx) {
+                        const arrayBuffer = Uint8Array.from(
+                          atob(base64),
+                          c => c.charCodeAt(0)
+                        ).buffer;
+        
+                        if (typeof mammoth !== "undefined") {
+                          mammoth.extractRawText({ arrayBuffer })
+                            .then(result => {
+                              resolve({
+                                fileName: file.name,
+                                fileType: "text/plain",
+                                fileData: result.value
+                              });
+                            })
+                            .catch(err => {
+                              console.error("DOCX conversion failed:", err);
+                              resolve({
+                                fileName: file.name,
+                                fileType: "text/plain",
+                                fileData: "[Could not extract text from DOCX]"
+                              });
+                            });
+                        } else {
+                          resolve({
+                            fileName: file.name,
+                            fileType: "text/plain",
+                            fileData: "[Mammoth library missing]"
+                          });
+                        }
+                        return;
+                      }
+        
+                      // ----------------------------------------------------
+                      // XLS / XLSX → CSV extraction
+                      // ----------------------------------------------------
+                      const isExcel =
+                        file.name.toLowerCase().endsWith(".xlsx") ||
+                        file.name.toLowerCase().endsWith(".xls");
+        
+                      if (isExcel) {
+                        try {
+                          const binary = atob(base64);
+                          const workbook = XLSX.read(binary, { type: "binary" });
+                          const sheetName = workbook.SheetNames[0];
+                          const sheet = workbook.Sheets[sheetName];
+        
+                          const csv = XLSX.utils.sheet_to_csv(sheet);
+        
+                          resolve({
+                            fileName: file.name,
+                            fileType: "text/plain",
+                            fileData: csv
+                          });
+                        } catch (err) {
+                          console.error("Excel conversion failed:", err);
+                          resolve({
+                            fileName: file.name,
+                            fileType: "text/plain",
+                            fileData: "[Could not extract text from Excel]"
+                          });
+                        }
+        
+                        return; // prevent double resolve
+                      }
+        
+                      // ----------------------------------------------------
+                      // Everything else → base64
+                      // ----------------------------------------------------
+                      fileData = base64;
+        
                       resolve({
                         fileName: file.name,
                         fileType: file.type,
-                        fileData: fileData // ✔ use the conditional value
+                        fileData
                       });
+        
                     } catch (err) {
                       reject(err);
                     }
                   };
+        
                   reader.onerror = reject;
                   reader.readAsDataURL(file);
                 });
               });
-    
+        
               Promise.all(fileReadPromises)
                 .then(filePayloads => {
                   window.voiceflow.chat.interact({
@@ -114,7 +205,6 @@
                   console.error(err);
                 });
             };
-    
             element.appendChild(input);
           }
         };

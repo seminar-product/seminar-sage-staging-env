@@ -1,4 +1,4 @@
-/* Standard HTML Heading Defaults */
+/* Standard HTML Heading Default Styling */
 /* ------------------------------ */
 .vfrc-system-response {
   --dark-blue: #065369;
@@ -39,3 +39,26 @@
   margin: 10px 0 2px;
   color: var(--very-light-blue);
 }
+
+/* HTML Table Styling */
+table {
+	width: 100% /* Spaces out the table content */
+}
+
+th, td {
+  padding: 12px 15px; /* Adds space inside cells */
+  text-align: left; /* Aligns text to the left */
+  border-bottom: 1px solid #ddd; /* Adds a light bottom border to each cell */
+}
+
+thead th {
+  background-color: #382641; /* Seminar purple */
+  color: #f9f9f9;
+  font-weight: bold;
+}
+
+tbody tr:nth-of-type(even) {
+  background-color: #f9f9f9; /* Zebra-striping: light gray background for even rows */
+}
+
+tbody tr:nth-of-

@@ -65,3 +65,11 @@ tbody tr:nth-of-type(even) {
 tbody tr:nth-of-type(odd) {
   background-color: #e0e0e0; /* Zebra-striping: white background for odd rows */
 }
+
+.vfrc-system-response .vfrc-button {
+  white-space: normal;
+  height: auto !important;       /* Adjusts height to accommodate wrapped text */
+  min-height: 40px;             /* Optional: maintains a consistent minimum look */
+  word-break: break-word;       /* Ensures long words don't overflow */
+  padding: 8px 12px !important; /* Adds padding for readability */
+}

@@ -69,8 +69,8 @@ tbody tr:nth-of-type(odd) {
 .vfrc-system-response .vfrc-button {
   white-space: normal;
   height: auto !important;       /* Adjusts height to accommodate wrapped text */
-  text-align: left;             /* Forces text to align to the left */
-  min-height: 40px;             /* Optional: maintains a consistent minimum look */
+  text-align: left;             /* Text to align to the left */
+  min-height: 40px;             /* Maintains a consistent minimum look */
   word-break: break-word;       /* Ensures long words don't overflow */
   padding: 8px 12px;           /* Adds padding for readability */
 }

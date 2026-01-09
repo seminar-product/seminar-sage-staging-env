@@ -63,7 +63,7 @@ tbody tr:nth-of-type(even) {
 }
 
 tbody tr:nth-of-type(odd) {
-  background-color: #e0e0e0; /* Zebra-striping: white background for odd rows */
+  background-color: #e0e0e0; /* Zebra-striping: dark gray background for odd rows */
 }
 
 .vfrc-system-response .vfrc-button {

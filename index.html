@@ -51,8 +51,8 @@
                 url: "https://runtime-api.voiceflow.com"
              },
        	 assistant: {
-             stylesheet: "chat-style.css", 
-        	 extensions: [FileUploadExtension]
+            stylesheet: "chat-style.css", 
+        	  extensions: [FileUploadExtension]
      	     },
               render: {
                 mode: 'embedded',
@@ -164,15 +164,18 @@
                             try {
                               const binary = atob(base64);
                               const workbook = XLSX.read(binary, { type: "binary" });
-                              const sheetName = workbook.SheetNames[0];
-                              const sheet = workbook.Sheets[sheetName];
-            
-                              const csv = XLSX.utils.sheet_to_csv(sheet);
-            
+
+                              // Process ALL sheets in workbook
+                              const allSheetsData = workbook.SheetNames.map(sheetName => {
+                                  const sheet = workbook.Sheets[sheetName];
+                                  const csv = XLSX.utils.sheet_to_csv(sheet);
+                                  return `### Sheet: ${sheetName}\n${csv}`;
+                              }).join("\n\n---\n\n");
+
                               resolve({
-                                fileName: file.name,
-                                fileType: "text/plain",
-                                fileData: csv
+                                  fileName: file.name,
+                                  fileType: "text/plain",
+                                  fileData: allSheetsData
                               });
                             } catch (err) {
                               console.error("Excel conversion failed:", err);
